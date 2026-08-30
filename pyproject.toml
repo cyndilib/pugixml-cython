@@ -1,7 +1,7 @@
 [project]
 name = "pugixml-cython"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Cython wrapper for pugixml"
 readme = "README.md"
 authors = [
     { name = "Matthew Reid", email = "matt@nomadic-recording.com" }
