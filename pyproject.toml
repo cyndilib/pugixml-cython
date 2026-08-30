@@ -31,6 +31,21 @@ pugixml_cython = [
     "extern/pugixml/src/pugiconfig.hpp",
 ]
 
+[tool.mypy]
+files = ["src/pugixml_cython/", "tests/**/*.py"]
+exclude = ["src/pugixml_cython/extern"]
+
+
+[tool.ruff]
+include = [
+    "pyproject.toml",
+    "src/**/*.py",
+    "src/**/*.pyi",
+    "tests/**/*.py",
+]
+exclude = ["src/pugixml_cython/extern"]
+
+
 [dependency-groups]
 build = [
     "cython>=3.3.0",
@@ -38,7 +53,12 @@ build = [
 ]
 dev = [
     {include-group = "build"},
-    {include-group = "test"}
+    {include-group = "test"},
+    {include-group = "lint"},
+]
+lint = [
+    "mypy>=2.3.1",
+    "ruff>=0.16.5",
 ]
 test = [
     "pytest>=9.1.1",
