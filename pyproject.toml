@@ -34,7 +34,12 @@ pugixml_cython = [
 [dependency-groups]
 build = [
     "cython>=3.3.0",
+    "setuptools>=84.0.0",
 ]
 dev = [
-    {include-group = "build"}
+    {include-group = "build"},
+    {include-group = "test"}
+]
+test = [
+    "pytest>=9.1.1",
 ]
