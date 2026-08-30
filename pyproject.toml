@@ -22,6 +22,15 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 exclude = ["tests", "tests.*"]
 
+[tool.setuptools.package-data]
+pugixml_cython = [
+    "*.pyx",
+    "*.pxd",
+    "extern/pugixml/src/pugixml.cpp",
+    "extern/pugixml/src/pugixml.hpp",
+    "extern/pugixml/src/pugiconfig.hpp",
+]
+
 [dependency-groups]
 build = [
     "cython>=3.3.0",

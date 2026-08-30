@@ -1,0 +1,6 @@
+recursive-include src/pugixml_cython *.pxd *.pyx *.hpp
+recursive-include src/pugixml_cython/extern/pugixml LICENSE* README*
+recursive-include src/pugixml_cython/extern/pugixml/src *.hpp
+recursive-exclude src/pugixml_cython/extern/pugixml .git* *.yml
+recursive-exclude src/pugixml_cython/extern/pugixml/scripts *
+recursive-exclude src/pugixml_cython/extern/pugixml/tests *
