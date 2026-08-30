@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import NamedTuple, Self
+from typing import NamedTuple
 
 import pytest
 
@@ -18,7 +20,7 @@ class XmlResult(NamedTuple):
     """The text content of the XML element, or None if it has no text"""
     attrib: dict[str, str]
     """The attributes of the XML element as a dictionary of name-value pairs"""
-    children: list[Self]
+    children: list[XmlResult]
     """The list of expected child elements"""
 
     def check(self, element: Element, recurse: bool = True) -> None:
