@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
+        python-version: ["cp{310,311,312,313,314}"]
         os:
           - "ubuntu-latest"
           - "windows-latest"
