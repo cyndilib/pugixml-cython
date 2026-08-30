@@ -1,0 +1,31 @@
+[project]
+name = "pugixml-cython"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Matthew Reid", email = "matt@nomadic-recording.com" }
+]
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = []
+
+[build-system]
+requires = [
+    "setuptools>=61",
+    "numpy",
+    "cython>=3.3.0"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests", "tests.*"]
+
+[dependency-groups]
+build = [
+    "cython>=3.3.0",
+]
+dev = [
+    {include-group = "build"}
+]
