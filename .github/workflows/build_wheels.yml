@@ -1,0 +1,73 @@
+name: Build Wheels
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - "pyproject.toml"
+    - "uv.lock"
+    - "setup.py"
+    - "src/**"
+    - ".github/workflows/build_wheels.yml"
+
+  pull_request:
+    branches: [ main ]
+    paths:
+    - "pyproject.toml"
+    - "uv.lock"
+    - "setup.py"
+    - "src/**"
+    - ".github/workflows/build_wheels.yml"
+
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}_${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CIBW_ARCHS: |-
+        ${{ case(
+          matrix.os == 'macos-15-intel', 'x86_64',
+          startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'macos'), 'arm64',
+          startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'ubuntu') && !contains(matrix.os, 'arm'), 'x86_64',
+          startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'ubuntu') && contains(matrix.os, 'arm'), 'aarch64',
+          startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'windows'), 'AMD64',
+          ''
+        )}}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
+        os:
+          - "ubuntu-latest"
+          - "windows-latest"
+          - "ubuntu-22.04-arm"
+          - "macos-latest"
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: 3.15
+        if: runner.os == 'macOS' && runner.arch == 'ARM64'
+
+      - name: Build wheels
+        id: build_wheel
+        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+        env:
+          CIBW_BUILD: ${{ matrix.python-version }}-*
+          CIBW_ARCHS: ${{ env.CIBW_ARCHS }}
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: ${{ steps.build_wheel.outcome  == 'success' }}
+        with:
+          path: ./wheelhouse/*.whl
+          name: wheel-${{ matrix.os }}-${{ matrix.python-version }}-${{ runner.os }}-${{ runner.arch }}

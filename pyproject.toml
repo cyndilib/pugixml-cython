@@ -45,6 +45,12 @@ include = [
 ]
 exclude = ["src/pugixml_cython/extern"]
 
+[tool.cibuildwheel]
+build-frontend = "uv"
+before-all = "uv export --frozen --no-emit-project --no-build --only-group test -o pylock.toml"
+before-test = "uv pip install -r pylock.toml"
+test-command = "pytest {project}/tests"
+
 
 [dependency-groups]
 build = [
