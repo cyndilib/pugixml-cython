@@ -1,0 +1,4 @@
+[submodule "src/pugixml_cython/extern/pugixml"]
+	path = src/pugixml_cython/extern/pugixml
+	url = https://github.com/cyndilib/pugixml.git
+	branch = cyndilib-latest
