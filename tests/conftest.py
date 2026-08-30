@@ -367,4 +367,5 @@ _text_xml_file_expected = XmlResult(
 def xml_test_case(request: pytest.FixtureRequest) -> XmlTestCase:
     """Fixture that provides XML test cases for parameterized tests.
     """
+    assert isinstance(request.param, XmlTestCase)
     return request.param
