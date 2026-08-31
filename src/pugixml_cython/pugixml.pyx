@@ -9,7 +9,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 
 
 cdef int _build_node_text(NodeStruct* node_struct, xml_node* node) except -1 nogil:
-    cdef xml_text text_node# = node.text()
+    cdef xml_text text_node
     if node.empty():
         node_struct.has_text = False
         node_struct.text = NULL
@@ -17,15 +17,14 @@ cdef int _build_node_text(NodeStruct* node_struct, xml_node* node) except -1 nog
     child = node.first_child()
 
     if child.type() != node_pcdata:
-    # if text_node.empty():
         node_struct.has_text = False
         node_struct.text = NULL
     else:
         node_struct.has_text = True
-        # node_struct.text = text_node.get()
         text_node = node.text()
         node_struct.text = text_node.get()
     return 0
+
 
 cdef int _init_node_struct(NodeStruct* node_struct) except -1 nogil:
     node_struct.type = node_null
@@ -37,15 +36,13 @@ cdef int _init_node_struct(NodeStruct* node_struct) except -1 nogil:
     node_struct.nest_level = 0
     node_struct.hash_value = 0
     node_struct.text = NULL
-    # node_struct.parent = NULL
-    # node_struct.children.clear()
     return 0
+
 
 cdef int _fill_node_struct(
     NodeStruct* node_struct,
     xml_node* node,
     size_t nest_level
-    # NodeStruct* parent_struct = NULL
 ) except -1 nogil:
     node_struct.type = node.type()
     node_struct.name = cpp_string(node.name())
@@ -53,11 +50,6 @@ cdef int _fill_node_struct(
     node_struct.is_empty = node.empty()
     node_struct.hash_value = node.hash_value()
     node_struct.nest_level = nest_level
-    # if parent_struct != NULL:
-    #     node_struct.nest_level = parent_struct.nest_level + 1
-    # else:
-    #     node_struct.nest_level = 0
-    # node_struct.parent = parent_struct
     _build_node_text(node_struct, node)
 
     cdef xml_attribute attr
@@ -73,8 +65,6 @@ cdef int _fill_node_struct(
     return 0
 
 
-
-
 cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map):
     cdef dict result = {}
     for pair in attribute_map:
@@ -82,13 +72,7 @@ cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map):
     return result
 
 
-
-
 cdef bint node_type_is_excluded(xml_node_type value, xml_node_type_set* excluded_node_types) noexcept nogil:
-    # if value == node_null:
-    #     return True
-    # if value == node_pcdata:
-    #     return True
     if excluded_node_types[0].find(value) != excluded_node_types[0].end():
         return True
     return False
@@ -212,17 +196,8 @@ cdef class Document:
         return self._nodes_by_hash_value.get(hash_value, None)
 
     cdef int _xpath_find(self, const char_t* xpath, NodeStruct* node_struct) except -1 nogil:
-
-        # if not self._has_document:
-        #     return None
-
         cdef xpath_node xresult = self.doc.select_node(xpath)
         cdef xml_node node = xresult.node()
-        # if node.type() == xml_node_type.node_null:
-        #     return None
-
-        # cdef size_t hash_value = node.hash_value()
-        # return self._find_from_hash_value(hash_value)
         _fill_node_struct(node_struct=node_struct, node=&node, nest_level=0)
         return 0
 
@@ -308,8 +283,6 @@ cdef class Element:
         self._position_indices.clear()
 
     def __dealloc__(self):
-        # self.node_struct.parent = NULL
-        # self.node_struct.children.clear()
         self._position.parent = NULL
         self._parent = None
         self.node_struct.attribute_map.clear()
@@ -352,12 +325,9 @@ cdef class Element:
         xml_node* node,
         xml_node_type_set* excluded_node_types
     ) except -1:
-
-        # _build_node_struct(&self.node_struct, node, parent)
         cdef xml_node* child
         cdef NodeStruct* child_node_struct
         cdef Element child_element
-        # cdef cpp_map[size_t, xml_node*] xml_children_by_hash
         cdef xml_node_type child_type
         cdef xml_node.iterator node_iter = node.begin()
         cdef size_t child_index = 0
@@ -367,9 +337,6 @@ cdef class Element:
             if child.empty():
                 inc(node_iter)
                 continue
-            # if child_type != node_element:
-            #     inc(node_iter)
-            #     continue
             if child_type == node_pcdata:
                 inc(node_iter)
                 continue
@@ -402,7 +369,6 @@ cdef class Element:
     def type(self) -> NodeType:
         """The type of the XML node as a :class:`NodeType`
         """
-        # return node_type_uncast(self.node_struct.type)
         return self._get_type()
 
     cdef NodeType _get_type(self) noexcept nogil:

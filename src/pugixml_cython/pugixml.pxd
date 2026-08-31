@@ -4,32 +4,15 @@
 
 from libc.stdint cimport *
 from libc.stddef cimport *
-from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string as cpp_string
 from libcpp.map cimport map as cpp_map
 from libcpp.pair cimport pair as cpp_pair
-# from libcpp.list cimport list as cpp_list
 from libcpp.vector cimport vector
-# from libcpp.array cimport array as cpp_array
 from libcpp.set cimport set as cpp_set
 
 
 include "pugiwrapper.pxi"
 
-# cdef extern from * nogil:
-#     """
-#     #include <cstdlib>
-#     struct NodeStructDeleter {
-#         void operator()(NodeStruct* node_struct) const
-#         {
-#             if (node_struct != NULL)
-#             {
-#                 free(node_struct);
-#             }
-#         }
-#     }
-#     """
-#     cdef struct NodeStructDeleter: pass
 
 ctypedef cpp_map[cpp_string, cpp_string] cpp_string_map
 ctypedef cpp_pair[cpp_string, cpp_string] cpp_string_pair
@@ -45,12 +28,8 @@ ctypedef cpp_map[cpp_string, vector[NodeStruct*]] children_by_name_map
 cdef extern from * namespace "pugiwrapper" nogil:
     """
     #include <cstdlib>
-    #include <vector>
-    #include <array>
     #include <map>
     #include <string>
-    #include <algorithm>
-    #include <utility>
     #include <pugixml.hpp>
 
     namespace pugiwrapper {
@@ -60,18 +39,15 @@ cdef extern from * namespace "pugiwrapper" nogil:
                 std::string name;
                 std::string path;
                 std::map<std::string, std::string> attribute_map;
-                // std::vector<NodeStruct*> children;
                 const char* text;
-                // NodeStruct* parent;
                 bool is_empty;
                 bool has_text;
                 size_t nest_level;
                 size_t hash_value;
 
-                NodeStruct() : type(pugi::node_null), /*parent(NULL),*/ is_empty(false), has_text(false), hash_value(0) {}
+                NodeStruct() : type(pugi::node_null), is_empty(false), has_text(false), hash_value(0) {}
                 ~NodeStruct() {
                     type = pugi::node_null;
-                    //parent = NULL;
                     text = NULL;
                     is_empty = false;
                     has_text = false;
@@ -82,7 +58,6 @@ cdef extern from * namespace "pugiwrapper" nogil:
 
     """
     cdef cppclass NodeStruct:
-        #NodeStruct* parent
         xml_node_type type
         cpp_string name
         cpp_string path
@@ -92,8 +67,6 @@ cdef extern from * namespace "pugiwrapper" nogil:
         size_t nest_level
         size_t hash_value
         const char_t* text
-        #NodeStruct* parent
-        # vector[NodeStruct*] children
 
 
 
@@ -122,15 +95,6 @@ cdef inline NodeType node_type_uncast(xml_node_type node_type) noexcept nogil:
     return <NodeType>node_type
 
 
-# cdef struct NodeTreeInfoStruct:
-#     NodeStruct* root
-#     children_by_name_map children_by_name
-#     cpp_map[cpp_string, vector[NodeStruct*]] children_by_path
-#     cpp_map[size_t, NodeStruct*] children_by_hash
-
-
-
-# ctypedef vector[NodePositionBase] node_position_vector
 ctypedef cpp_set[xml_node_type] xml_node_type_set
 
 cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map)
@@ -149,7 +113,6 @@ cdef class Document:
     cdef int _collect_nodes_by_hash_value(self) except -1
     cdef Element _find_from_hash_value(self, size_t hash_value)
     cdef int _xpath_find(self, const char_t* xpath, NodeStruct* node_struct) except -1 nogil
-    # cdef list _xpath_findall(self, const char_t* xpath)
     cdef int _xpath_findall(self, const char_t* xpath, vector[NodeStruct*]* results) except -1 nogil
 
 
@@ -183,4 +146,3 @@ cdef class Element:
     cdef Element _get_root(self)
     cdef NodeType _get_type(self) noexcept nogil
     cdef bint _is_null(self) noexcept nogil
-    # cdef Element _find_from_hash_value(self, size_t hash_value)
