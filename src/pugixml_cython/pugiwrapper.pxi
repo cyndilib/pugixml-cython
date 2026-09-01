@@ -1,8 +1,29 @@
 
+from libcpp.exception cimport exception, runtime_error, delegate_to_exception_handlers
 from libcpp.string cimport string as cpp_string
 
 ctypedef char char_t
 ctypedef cpp_string string_t
+
+
+
+# Handlers for individual exceptions
+cdef inline void handle_xpath_exception(const xpath_exception& e) except*:
+    raise ValueError(e.what().decode("ascii"))
+
+cdef inline void handle_runtime_error(const runtime_error& e) except*:
+    raise RuntimeError(e.what().decode("ascii"))
+
+cdef inline void handle_anything(const exception& e) except*:
+    try:
+        msg = e.what().decode("ascii")
+    except:
+        msg = "Unknown error"
+    raise Exception(msg)  # Raise a generic exception for any other errors
+
+# Overall exception handler mechanism
+cdef inline void custom_exception_handler() except*:
+    delegate_to_exception_handlers(handle_xpath_exception, handle_runtime_error, handle_anything)
 
 
 cdef extern from "pugixml.hpp" namespace "pugi" nogil:
@@ -206,12 +227,12 @@ cdef extern from "pugixml.hpp" namespace "pugi" nogil:
         bint traverse(xml_tree_walker& walker)
 
         # Select single node by evaluating XPath query. Returns first node from the resulting node set.
-        xpath_node select_node(const char_t* xpath)
-        xpath_node select_node(const xpath_query& query)
+        xpath_node select_node(const char_t* xpath) except +custom_exception_handler
+        xpath_node select_node(const xpath_query& query) except +custom_exception_handler
 
         # Select node set by evaluating XPath query
-        xpath_node_set select_nodes(const char_t* xpath)
-        xpath_node_set select_nodes(const xpath_query& query)
+        xpath_node_set select_nodes(const char_t* xpath) except +custom_exception_handler
+        xpath_node_set select_nodes(const xpath_query& query) except +custom_exception_handler
 
         # Print subtree using a writer object
         void print(xml_writer& writer)
@@ -302,6 +323,9 @@ cdef extern from "pugixml.hpp" namespace "pugi" nogil:
         bint set(bint value)
         bint set(long long value)
         bint set(unsigned long long value)
+
+    cdef cppclass xpath_exception(exception):
+        const xpath_parse_result* result()
 
     cdef cppclass xpath_node:
         xpath_node()
