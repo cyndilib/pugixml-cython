@@ -26,6 +26,7 @@ exclude = ["tests", "tests.*"]
 pugixml_cython = [
     "*.pyx",
     "*.pxd",
+    "*.pxi",
     "extern/pugixml/src/pugixml.cpp",
     "extern/pugixml/src/pugixml.hpp",
     "extern/pugixml/src/pugiconfig.hpp",
