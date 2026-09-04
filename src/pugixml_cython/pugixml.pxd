@@ -16,10 +16,7 @@ include "pugiwrapper.pxi"
 
 ctypedef cpp_map[cpp_string, cpp_string] cpp_string_map
 ctypedef cpp_pair[cpp_string, cpp_string] cpp_string_pair
-ctypedef vector[xml_node*] cpp_xml_node_list
-ctypedef cpp_map[string_t, xml_node*] cpp_string_node_ptr_map
-ctypedef cpp_pair[string_t, xml_node*] cpp_string_node_ptr_pair
-ctypedef cpp_map[cpp_string, vector[NodeStruct*]] children_by_name_map
+ctypedef cpp_set[xml_node_type] xml_node_type_set
 
 
 
@@ -97,7 +94,6 @@ cdef inline NodeType node_type_uncast(xml_node_type node_type) noexcept nogil:
     return <NodeType>node_type
 
 
-ctypedef cpp_set[xml_node_type] xml_node_type_set
 
 cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map)
 
