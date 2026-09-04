@@ -104,8 +104,7 @@ cdef class Document:
         cdef cpp_string error_message
         if result.status != status_ok:
             error_message = result.description()
-            with gil:
-                raise RuntimeError(error_message.decode('utf-8'))
+            raise RuntimeError(error_message.decode('utf-8'))
         self._has_document = True
         return 0
 
