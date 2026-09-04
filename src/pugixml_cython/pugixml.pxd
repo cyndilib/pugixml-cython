@@ -79,6 +79,8 @@ cdef struct NodePosition:
 
 
 cpdef enum NodeType:
+    """Enumeration of XML node types
+    """
     NODE_NULL = xml_node_type.node_null
     NODE_ELEMENT = xml_node_type.node_element
     NODE_PCData = xml_node_type.node_pcdata

@@ -5,6 +5,8 @@ cimport cython
 
 from cython.operator cimport dereference as deref, preincrement as inc
 
+from typing import Iterator, Self
+
 
 
 
@@ -439,7 +441,7 @@ cdef class Element:
         return self.node_struct.hash_value
 
     @property
-    def attributes(self) -> dict:
+    def attributes(self) -> dict[str, str]:
         """A dictionary of the XML node's attributes
         """
         return _attribute_map_to_dict(self.node_struct.attribute_map)
@@ -455,7 +457,7 @@ cdef class Element:
         return tuple(self._position_indices)
 
 
-    def find_from_position(self, position: tuple[int, ...]) -> "Element"|None:
+    def find_from_position(self, position: tuple[int, ...]) -> Self|None:
         """Find a node in the tree based on its :attr:`node_position`
         """
         cdef Element element = self._get_root()
@@ -465,22 +467,22 @@ cdef class Element:
             element = element._children[index]
         return element
 
-    def walk(self):
+    def walk(self) -> Iterator[Self]:
         """Yield all nodes in the subtree rooted at this node, including itself
         """
         yield self
         for child in self._children:
             yield from child.walk()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Self]:
         for child in self._children:
             yield child
 
     def __len__(self) -> int:
         return len(self._children)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Self:
         return self._children[index]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Element name={self.name!r} attributes={self.attributes!r} text={self.text!r}>"
