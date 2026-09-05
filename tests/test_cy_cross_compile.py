@@ -1,4 +1,3 @@
-import shlex
 import subprocess
 from pathlib import Path
 
@@ -48,9 +47,8 @@ def test_cy_cross_compile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     xml_file.write_text('<root value="123"></root>')
 
     # Cythonize and compile the Cython source code
-    compile_command = f"cythonize -i {cy_file}"
     subprocess.run(
-        shlex.split(compile_command),
+        ["cythonize", "-i", str(cy_file)],
         check=True,
     )
 
