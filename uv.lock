@@ -3,7 +3,9 @@ revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.15'",
-    "python_full_version < '3.15'",
+    "python_full_version >= '3.12' and python_full_version < '3.15'",
+    "python_full_version == '3.11.*'",
+    "python_full_version < '3.11'",
 ]
 
 [[package]]
@@ -379,6 +381,9 @@ wheels = [
 name = "pugixml-cython"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
 
 [package.dev-dependencies]
 build = [
@@ -387,7 +392,9 @@ build = [
 ]
 dev = [
     { name = "cython" },
+    { name = "mypy" },
     { name = "pytest" },
+    { name = "ruff" },
     { name = "setuptools" },
 ]
 lint = [
@@ -399,6 +406,7 @@ test = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.16.0" }]
 
 [package.metadata.requires-dev]
 build = [
@@ -407,7 +415,9 @@ build = [
 ]
 dev = [
     { name = "cython", specifier = ">=3.3.0" },
+    { name = "mypy", specifier = ">=2.3.1" },
     { name = "pytest", specifier = ">=9.1.1" },
+    { name = "ruff", specifier = ">=0.16.5" },
     { name = "setuptools", specifier = ">=84.0.0" },
 ]
 lint = [

@@ -5,7 +5,13 @@ cimport cython
 
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from typing import Iterator, Self
+import sys
+from typing import Iterator
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 
 
 
