@@ -402,6 +402,7 @@ lint = [
     { name = "ruff" },
 ]
 test = [
+    { name = "cython" },
     { name = "pytest" },
 ]
 
@@ -424,7 +425,10 @@ lint = [
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "ruff", specifier = ">=0.16.5" },
 ]
-test = [{ name = "pytest", specifier = ">=9.1.1" }]
+test = [
+    { name = "cython", specifier = ">=3.3.0" },
+    { name = "pytest", specifier = ">=9.1.1" },
+]
 
 [[package]]
 name = "pygments"

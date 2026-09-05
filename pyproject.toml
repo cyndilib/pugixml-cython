@@ -71,4 +71,5 @@ lint = [
 ]
 test = [
     "pytest>=9.1.1",
+    "cython>=3.3.0",
 ]
