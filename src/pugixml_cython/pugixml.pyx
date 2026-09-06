@@ -185,6 +185,16 @@ cdef class Document:
         """
         return self._get_root()
 
+    def get_node_by_position(self, tuple[int, ...] node_position) -> Element | None:
+        """Get the XML node represented by its :attr:`~Element.node_position`
+        """
+        if not self._has_document:
+            return None
+        cdef Element element = self._get_root()
+        if element is None:
+            return None
+        return element.find_from_position(node_position)
+
     cdef int _collect_nodes_by_hash_value(self) except -1:
         if not self._has_document:
             return 0

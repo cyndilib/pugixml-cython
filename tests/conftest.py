@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 from typing import NamedTuple
 
@@ -22,6 +23,10 @@ class XmlResult(NamedTuple):
     """The attributes of the XML element as a dictionary of name-value pairs"""
     children: list[XmlResult]
     """The list of expected child elements"""
+    node_position: tuple[int, ...] | None = None
+    """The position of the XML node in the tree as a tuple of indices from the
+    root to this node
+    """
 
     def check(self, element: Element, recurse: bool = True) -> None:
         """Check that the given XML element matches the expected structure.
@@ -38,6 +43,8 @@ class XmlResult(NamedTuple):
             assert element.has_text
 
         assert element.attributes == self.attrib
+        if self.node_position is not None:
+            assert element.node_position == self.node_position
         if not recurse:
             return
 
@@ -47,6 +54,12 @@ class XmlResult(NamedTuple):
             child_element = element[i]
             # check_element(child_element, expected_child, recurse=recurse)
             expected_child.check(child_element, recurse=recurse)
+
+    def walk(self) -> Iterator[XmlResult]:
+        """Yield all XmlResult instances in the tree, including self."""
+        yield self
+        for child in self.children:
+            yield from child.walk()
 
 
 class XmlTestCase(NamedTuple):
@@ -76,15 +89,35 @@ SAMPLE_XML_TEST_CASE = XmlTestCase(
         tag="body",
         text=None,
         attrib={},
+        node_position=(0,),
         children=[
-            XmlResult(tag="tag", text="text", attrib={"class": "a"}, children=[]),
-            XmlResult(tag="tag", text=None, attrib={"class": "b"}, children=[]),
+            XmlResult(
+                tag="tag",
+                text="text",
+                attrib={"class": "a"},
+                node_position=(0, 0),
+                children=[],
+            ),
+            XmlResult(
+                tag="tag",
+                text=None,
+                attrib={"class": "b"},
+                node_position=(0, 1),
+                children=[],
+            ),
             XmlResult(
                 tag="section",
                 text=None,
                 attrib={},
+                node_position=(0, 2),
                 children=[
-                    XmlResult(tag="tag", text="subtext", attrib={"class": "b", "id": "inner"}, children=[])
+                    XmlResult(
+                        tag="tag",
+                        text="subtext",
+                        attrib={"class": "b", "id": "inner"},
+                        node_position=(0, 2, 0),
+                        children=[]
+                    )
                 ],
             ),
         ],
@@ -107,15 +140,35 @@ SAMPLE_SECTION_TEST_CASE = XmlTestCase(
         tag="section",
         text=None,
         attrib={},
+        node_position=(0,),
         children=[
-            XmlResult(tag="tag", text="subtext", attrib={"class": "b", "id": "inner"}, children=[]),
-            XmlResult(tag="nexttag", text=None, attrib={}, children=[]),
+            XmlResult(
+                tag="tag",
+                text="subtext",
+                attrib={"class": "b", "id": "inner"},
+                node_position=(0, 0),
+                children=[]
+            ),
+            XmlResult(
+                tag="nexttag",
+                text=None,
+                attrib={},
+                node_position=(0, 1),
+                children=[]
+            ),
             XmlResult(
                 tag="nextsection",
                 text=None,
                 attrib={},
+                node_position=(0, 2),
                 children=[
-                    XmlResult(tag="tag", text=None, attrib={}, children=[])
+                    XmlResult(
+                        tag="tag",
+                        text=None,
+                        attrib={},
+                        node_position=(0, 2, 0),
+                        children=[]
+                    )
                 ],
             ),
         ],
@@ -138,15 +191,35 @@ SAMPLE_XML_NS_TEST_CASE = XmlTestCase(
         tag="body",
         text=None,
         attrib={"xmlns": "http://effbot.org/ns"},
+        node_position=(0,),
         children=[
-            XmlResult(tag="tag", text="text", attrib={}, children=[]),
-            XmlResult(tag="tag", text=None, attrib={}, children=[]),
+            XmlResult(
+                tag="tag",
+                text="text",
+                attrib={},
+                node_position=(0, 0),
+                children=[]
+            ),
+            XmlResult(
+                tag="tag",
+                text=None,
+                attrib={},
+                node_position=(0, 1),
+                children=[]
+            ),
             XmlResult(
                 tag="section",
                 text=None,
                 attrib={},
+                node_position=(0, 2),
                 children=[
-                    XmlResult(tag="tag", text="subtext", attrib={}, children=[])
+                    XmlResult(
+                        tag="tag",
+                        text="subtext",
+                        attrib={},
+                        node_position=(0, 2, 0),
+                        children=[]
+                    ),
                 ],
             ),
         ],
@@ -175,20 +248,35 @@ SAMPLE_XML_NS_ELEMS_TEST_CASE = XmlTestCase(
     expected=XmlResult(
         tag="root",
         text=None,
+        node_position=(0,),
         attrib={},
         children=[
             XmlResult(
                 tag="h:table",
                 text=None,
+                node_position=(0, 0),
                 attrib={"xmlns:h": "hello"},
                 children=[
                     XmlResult(
                         tag="h:tr",
                         text=None,
+                        node_position=(0, 0, 0),
                         attrib={},
                         children=[
-                            XmlResult(tag="h:td", text="Apples", attrib={}, children=[]),
-                            XmlResult(tag="h:td", text="Bananas", attrib={}, children=[]),
+                            XmlResult(
+                                tag="h:td",
+                                text="Apples",
+                                attrib={},
+                                node_position=(0, 0, 0, 0),
+                                children=[]
+                            ),
+                            XmlResult(
+                                tag="h:td",
+                                text="Bananas",
+                                attrib={},
+                                node_position=(0, 0, 0, 1),
+                                children=[]
+                            ),
                         ],
                     )
                 ],
@@ -196,11 +284,30 @@ SAMPLE_XML_NS_ELEMS_TEST_CASE = XmlTestCase(
             XmlResult(
                 tag="f:table",
                 text=None,
+                node_position=(0, 1),
                 attrib={"xmlns:f": "foo"},
                 children=[
-                    XmlResult(tag="f:name", text="African Coffee Table", attrib={}, children=[]),
-                    XmlResult(tag="f:width", text="80", attrib={}, children=[]),
-                    XmlResult(tag="f:length", text="120", attrib={}, children=[]),
+                    XmlResult(
+                        tag="f:name",
+                        text="African Coffee Table",
+                        attrib={},
+                        node_position=(0, 1, 0),
+                        children=[]
+                    ),
+                    XmlResult(
+                        tag="f:width",
+                        text="80",
+                        attrib={},
+                        node_position=(0, 1, 1),
+                        children=[]
+                    ),
+                    XmlResult(
+                        tag="f:length",
+                        text="120",
+                        attrib={},
+                        node_position=(0, 1, 2),
+                        children=[]
+                    ),
                 ],
             ),
         ],
@@ -220,6 +327,7 @@ ENTITY_XML_TEST_CASE = XmlTestCase(
     expected=XmlResult(
         tag="document",
         text="&entity;",
+        node_position=(0,),
         attrib={},
         children=[],
     ),
@@ -237,6 +345,7 @@ EXTERNAL_ENTITY_XML_TEST_CASE = XmlTestCase(
     expected=XmlResult(
         tag="document",
         text="&entity;",
+        node_position=(0,),
         attrib={},
         children=[],
     ),
@@ -260,11 +369,13 @@ ATTLIST_XML_TEST_CASE = XmlTestCase(
     expected=XmlResult(
         tag="foo",
         text=None,
+        node_position=(0,),
         attrib={},
         children=[
             XmlResult(
                 tag="bar",
                 text="&qux;",
+                node_position=(0, 0),
                 attrib={},
                 children=[]
             )
@@ -279,11 +390,30 @@ XML_FILE_SIMPLE_TEST_CASE = XmlTestCase(
     expected=XmlResult(
         tag="root",
         text="tail",
+        node_position=(0,),
         attrib={},
         children=[
-            XmlResult(tag="element", text="text", attrib={"key": "value"}, children=[]),
-            XmlResult(tag="element", text="text", attrib={}, children=[]),
-            XmlResult(tag="empty-element", text=None, attrib={}, children=[]),
+            XmlResult(
+                tag="element",
+                text="text",
+                attrib={"key": "value"},
+                node_position=(0, 0),
+                children=[]
+            ),
+            XmlResult(
+                tag="element",
+                text="text",
+                attrib={},
+                node_position=(0, 1),
+                children=[]
+            ),
+            XmlResult(
+                tag="empty-element",
+                text=None,
+                attrib={},
+                node_position=(0, 2),
+                children=[]
+            ),
         ],
     ),
 )
