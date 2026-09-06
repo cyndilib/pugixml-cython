@@ -329,7 +329,6 @@ cdef class Element:
         else:
             nest_level = 0
             self._position.parent = NULL
-            self._position_indices.push_back(0)
         self._position.nest_level = nest_level
         # This will be filled in `_build_children`
         self._position.index = 0
@@ -362,9 +361,6 @@ cdef class Element:
                 continue
             child_element = Element._create(child, excluded_node_types, self)
             child_element._position.index = child_index
-            for pos_index in self._position_indices:
-                child_element._position_indices.push_back(pos_index)
-            child_element._position_indices.push_back(child_index)
             self._children.append(child_element)
             inc(node_iter)
             child_index += 1
@@ -470,8 +466,22 @@ cdef class Element:
         The root node will always be represented by a single zero: ``(0,)``.
         Each subsequent index represents the position of the node among its siblings at that level.
         """
+        if not self._position_indices.size():
+            self._construct_position_indices()
         return tuple(self._position_indices)
 
+    cdef int _construct_position_indices(self) except -1 nogil:
+        cdef NodePosition* node_position = &self._position
+        cdef vector[size_t] position_indices = vector[size_t]()
+        while node_position is not NULL:
+            position_indices.push_back(node_position.index)
+            node_position = node_position.parent
+
+        self._position_indices.clear()
+        cdef size_t value
+        for value in reversed(position_indices):
+            self._position_indices.push_back(value)
+        return 0
 
     def find_from_position(self, position: tuple[int, ...]) -> Self|None:
         """Find a node in the tree based on its :attr:`node_position`

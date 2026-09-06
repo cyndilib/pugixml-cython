@@ -144,3 +144,4 @@ cdef class Element:
     cdef Element _get_root(self)
     cdef NodeType _get_type(self) noexcept nogil
     cdef bint _is_null(self) noexcept nogil
+    cdef int _construct_position_indices(self) except -1 nogil
