@@ -72,6 +72,18 @@ cdef int _fill_node_struct(
         inc(attr_iter)
     return 0
 
+cdef xml_node _get_child_node_by_index(xml_node* parent, size_t index) noexcept nogil:
+    cdef xml_node child
+    cdef size_t i = 0
+    cdef xml_node.iterator node_iter = parent.begin()
+    while node_iter != parent.end():
+        child = deref(node_iter)
+        if i == index:
+            return child
+        i += 1
+        inc(node_iter)
+    return xml_node()  # Return an empty node if the index is out of range
+
 
 cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map):
     cdef dict result = {}
@@ -95,6 +107,9 @@ cdef class Document:
     def __init__(self):
         self._root_element = Element()
         self._nodes_by_hash_value = {}
+
+    cdef xml_document* _get_xml_document(self) noexcept nogil:
+        return &self.doc
 
     cdef int _reset(self) except -1 nogil:
         if self._has_root():
@@ -377,6 +392,28 @@ cdef class Element:
         self._children_count = 0
         self._position_indices.clear()
         return 0
+
+    def clone(self, Document document not None) -> Self:
+        """Create a deep copy of this element and its children
+
+        Arguments:
+            document (Document): The document that created this element.
+
+        """
+        cdef xml_document* xml_doc = document._get_xml_document()
+        if self._position_indices.size() == 0:
+            self._construct_position_indices()
+        cdef xml_node cur_node = xml_doc.document_element()
+        cdef size_t i = 0
+        cdef size_t cur_index
+        for cur_index in self._position_indices:
+            if i == 0:
+                # Root node is already set as cur_node
+                i += 1
+                continue
+            cur_node = _get_child_node_by_index(&cur_node, cur_index)
+        return Element._create(&cur_node, &document._excluded_node_types, None)
+
 
     @property
     def type(self) -> NodeType:

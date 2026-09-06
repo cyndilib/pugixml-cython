@@ -28,12 +28,13 @@ class XmlResult(NamedTuple):
     root to this node
     """
 
-    def check(self, element: Element, recurse: bool = True) -> None:
+    def check(self, element: Element, recurse: bool = True, match_position: bool = True) -> None:
         """Check that the given XML element matches the expected structure.
 
         Args:
             element: The XML element to check.
             recurse: Whether to recursively check child elements.
+            match_position: Whether to check the node position of the XML element.
         """
         assert element.name == self.tag
         assert element.text == self.text
@@ -43,7 +44,7 @@ class XmlResult(NamedTuple):
             assert element.has_text
 
         assert element.attributes == self.attrib
-        if self.node_position is not None:
+        if match_position and self.node_position is not None:
             assert element.node_position == self.node_position
         if not recurse:
             return
@@ -53,7 +54,7 @@ class XmlResult(NamedTuple):
         for i, expected_child in enumerate(self.children):
             child_element = element[i]
             # check_element(child_element, expected_child, recurse=recurse)
-            expected_child.check(child_element, recurse=recurse)
+            expected_child.check(child_element, recurse=recurse, match_position=match_position)
 
     def walk(self) -> Iterator[XmlResult]:
         """Yield all XmlResult instances in the tree, including self."""

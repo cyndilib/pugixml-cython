@@ -104,6 +104,7 @@ cdef class Document:
     cdef dict _nodes_by_hash_value
     cdef xml_node_type_set _excluded_node_types
 
+    cdef xml_document* _get_xml_document(self) noexcept nogil
     cdef int _reset(self) except -1 nogil
     cdef int _load_string(self, const char_t* xml_string) except -1 nogil
     cdef bint _has_root(self) except -1 nogil
