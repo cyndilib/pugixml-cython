@@ -401,19 +401,15 @@ cdef class Element:
 
         """
         cdef xml_document* xml_doc = document._get_xml_document()
-        if self._position_indices.size() == 0:
-            self._construct_position_indices()
-        cdef xml_node cur_node = xml_doc.document_element()
-        cdef size_t i = 0
-        cdef size_t cur_index
-        for cur_index in self._position_indices:
-            if i == 0:
-                # Root node is already set as cur_node
-                i += 1
-                continue
-            cur_node = _get_child_node_by_index(&cur_node, cur_index)
-        return Element._create(&cur_node, &document._excluded_node_types, None)
-
+        cdef const char* xpath = self.node_struct.path.c_str()
+        cdef xpath_node_set xresults = xml_doc.select_nodes(xpath)
+        cdef xpath_node xresult
+        cdef xml_node node
+        for xresult in xresults:
+            node = xresult.node()
+            if node.hash_value() == self.node_struct.hash_value:
+                return Element._create(&node, &document._excluded_node_types, None)
+        raise ValueError("Failed to find child node by hash value")
 
     @property
     def type(self) -> NodeType:
