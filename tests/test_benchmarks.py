@@ -85,13 +85,16 @@ class XmlNode:
         # We could use faker.unique.word() to ensure uniqueness,
         # but it may raise UniquenessException if we run out of unique words.
         key_list = [faker.word() for _ in range(attrs_per_node)]
-        keys = set(key_list)
-        if len(keys) < attrs_per_node:
-            num_to_add = attrs_per_node - len(keys)
-            extra_keys = (
-                f"{key}-{faker.random_letter()}" for key in list(keys)[:num_to_add]
-            )
-            keys.update(extra_keys)
+        keys: list[str] = []
+        used_keys: set[str] = set()
+        for key in key_list:
+            candidate = key
+            suffix = 1
+            while candidate in used_keys:
+                candidate = f"{key}-{suffix}"
+                suffix += 1
+            used_keys.add(candidate)
+            keys.append(candidate)
         assert len(keys) == attrs_per_node
         attrs = {key: faker.word() for key in keys}
         if num_levels <= 0:
