@@ -97,10 +97,11 @@ class XmlNode:
             keys.append(candidate)
         assert len(keys) == attrs_per_node
         attrs = {key: faker.word() for key in keys}
-        if num_levels <= 0:
-            return XmlNode(name=faker.word(), attributes=attrs, children=[])
 
-        node = XmlNode(name=faker.word(), attributes=attrs, children=[], parent=parent)
+        node = cls(name=faker.word(), attributes=attrs, children=[], parent=parent)
+        if num_levels <= 0:
+            return node
+
         node.children = [
             cls.create(
                 faker=faker,
