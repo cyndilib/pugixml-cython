@@ -47,8 +47,10 @@ jobs:
         include:
           - os: "blacksmith-4vcpu-ubuntu-2404-arm"
             linux-image: "manylinux"
+            python-version: "cp{310,311,312,313,314}"
           - os: "blacksmith-4vcpu-ubuntu-2404-arm"
             linux-image: "musllinux"
+            python-version: "cp{310,311,312,313,314}"
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
