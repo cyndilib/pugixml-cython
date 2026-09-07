@@ -72,17 +72,6 @@ cdef int _fill_node_struct(
         inc(attr_iter)
     return 0
 
-cdef xml_node _get_child_node_by_index(xml_node* parent, size_t index) noexcept nogil:
-    cdef xml_node child
-    cdef size_t i = 0
-    cdef xml_node.iterator node_iter = parent.begin()
-    while node_iter != parent.end():
-        child = deref(node_iter)
-        if i == index:
-            return child
-        i += 1
-        inc(node_iter)
-    return xml_node()  # Return an empty node if the index is out of range
 
 
 cdef dict _attribute_map_to_dict(cpp_string_map& attribute_map):
@@ -392,24 +381,6 @@ cdef class Element:
         self._children_count = 0
         self._position_indices.clear()
         return 0
-
-    def clone(self, Document document not None) -> Self:
-        """Create a deep copy of this element and its children
-
-        Arguments:
-            document (Document): The document that created this element.
-
-        """
-        cdef xml_document* xml_doc = document._get_xml_document()
-        cdef const char* xpath = self.node_struct.path.c_str()
-        cdef xpath_node_set xresults = xml_doc.select_nodes(xpath)
-        cdef xpath_node xresult
-        cdef xml_node node
-        for xresult in xresults:
-            node = xresult.node()
-            if node.hash_value() == self.node_struct.hash_value:
-                return Element._create(&node, &document._excluded_node_types, None)
-        raise ValueError("Failed to find child node by hash value")
 
     @property
     def type(self) -> NodeType:
