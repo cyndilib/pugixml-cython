@@ -267,7 +267,11 @@ def test_xml_nodes_with_multiple_children(
 
 
 
-@pytest.mark.parametrize("with_attributes", [False, True])
+@pytest.mark.parametrize(
+    "with_attributes",
+    [False, True],
+    ids=["no_attributes", "with_attributes"],
+)
 def test_xpath_deep_search(
     benchmark: BenchmarkFixture,
     xml_node_with_multiple_children: XmlNode,
