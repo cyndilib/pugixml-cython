@@ -74,4 +74,5 @@ test = [
     "cython>=3.3.0",
     "setuptools>=84.0.0 ; python_full_version >= '3.12'",
     "pytest-codspeed>=5.0.3",
+    "faker>=40.38.0",
 ]
