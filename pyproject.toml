@@ -1,6 +1,6 @@
 [project]
 name = "pugixml-cython"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Cython wrapper for pugixml"
 readme = "README.md"
 authors = [
