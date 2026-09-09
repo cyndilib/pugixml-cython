@@ -37,7 +37,7 @@ jobs:
       CIBW_ARCHS: |-
         ${{ case(
           matrix.os == 'macos-15-intel', 'x86_64',
-          startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'macos'), 'arm64',
+          matrix.os == 'macos-latest', 'arm64',
           startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'ubuntu') && !contains(matrix.os, 'arm'), 'x86_64',
           startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'ubuntu') && contains(matrix.os, 'arm'), 'aarch64',
           startsWith(matrix.os, 'blacksmith') && contains(matrix.os, 'windows'), 'AMD64',
@@ -51,6 +51,7 @@ jobs:
           - "blacksmith-2vcpu-ubuntu-2404"
           - "blacksmith-2vcpu-windows-2025"
           - "macos-latest"
+          - "macos-15-intel"
         include:
           - os: "blacksmith-4vcpu-ubuntu-2404-arm"
             linux-image: "manylinux"
