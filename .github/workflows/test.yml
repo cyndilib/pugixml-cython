@@ -9,6 +9,7 @@ on:
     - "setup.py"
     - "src/**"
     - "tests/**"
+    - ".github/actions/install-project/**"
     - ".github/workflows/test.yml"
 
   pull_request:
@@ -19,6 +20,7 @@ on:
     - "setup.py"
     - "src/**"
     - "tests/**"
+    - ".github/actions/install-project/**"
     - ".github/workflows/test.yml"
 
 
