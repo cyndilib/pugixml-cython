@@ -7,6 +7,7 @@ Options.fast_fail = True
 extensions = [
     Extension(
         "pugixml_cython.pugixml",
+        define_macros=[("PUGIXML_HEADER_ONLY", "1")],
         sources=[
             "src/pugixml_cython/pugixml.pyx",
         ],
