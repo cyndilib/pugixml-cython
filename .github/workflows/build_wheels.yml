@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["cp{310,311,312,313,314}"]
+        python-version: ["cp{310,311,312,313,314,315}"]
         os:
           - "blacksmith-2vcpu-ubuntu-2404"
           - "blacksmith-2vcpu-windows-2025"
@@ -55,10 +55,10 @@ jobs:
         include:
           - os: "blacksmith-4vcpu-ubuntu-2404-arm"
             linux-image: "manylinux"
-            python-version: "cp{310,311,312,313,314}"
+            python-version: "cp{310,311,312,313,314,315}"
           - os: "blacksmith-4vcpu-ubuntu-2404-arm"
             linux-image: "musllinux"
-            python-version: "cp{310,311,312,313,314}"
+            python-version: "cp{310,311,312,313,314,315}"
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -73,7 +73,7 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: 3.14
+          python-version: 3.15
         if: runner.os == 'macOS' && runner.arch == 'ARM64'
 
       - name: Build wheels
